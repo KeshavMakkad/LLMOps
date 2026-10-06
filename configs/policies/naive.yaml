@@ -1,0 +1,7 @@
+name: naive
+description: >-
+  Baseline a typical RAG app ships with: every request goes to the strong model with the top-8
+  retrieved chunks, untouched. No cache, no reranking, no compression, no routing.
+default_tier: strong
+retrieval: {enabled: true, chunk_words: 150, overlap_words: 30, top_k: 8}
+context: {rerank: false, keep: 8}

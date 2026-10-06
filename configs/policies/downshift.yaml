@@ -1,0 +1,11 @@
+name: downshift
+description: "Ablation: only model downshift rules (route easy requests to the cheap tier)."
+default_tier: strong
+retrieval: {enabled: true, chunk_words: 150, overlap_words: 30, top_k: 8}
+context: {rerank: false, keep: 8}
+downshift:
+  enabled: true
+  rules:
+    - {name: pasted-text-needs-strong, tier: strong, has_user_context: true}
+    - {name: numbers-need-strong, tier: strong, numeric_reasoning: true}
+    - {name: everything-else-cheap, tier: cheap}
