@@ -1,0 +1,6 @@
+name: compress
+description: "Ablation: only query-aware extractive prompt compression (keep ~60% of context words)."
+default_tier: strong
+retrieval: {enabled: true, chunk_words: 150, overlap_words: 30, top_k: 8}
+context: {rerank: false, keep: 8}
+compression: {enabled: true, target_ratio: 0.6}

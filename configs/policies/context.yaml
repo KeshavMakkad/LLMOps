@@ -1,0 +1,5 @@
+name: context
+description: "Ablation: only context-window management (cross-encoder rerank, keep top 3, 450-word budget)."
+default_tier: strong
+retrieval: {enabled: true, chunk_words: 150, overlap_words: 30, top_k: 8}
+context: {rerank: true, keep: 3, max_context_words: 450}
