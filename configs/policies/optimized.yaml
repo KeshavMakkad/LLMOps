@@ -1,0 +1,16 @@
+name: optimized
+description: >-
+  All levers on: guarded semantic cache (threshold 0.84 + number guard + cheap-LLM verifier, chosen from `frugal sweep`), rerank to top 3 within a 450-word budget, query-aware
+  compression to ~60%, and downshift of easy requests to the cheap tier. This is the file a PR
+  changes; the eval gate checks it against `naive`.
+default_tier: strong
+cache: {exact: true, semantic: true, threshold: 0.84, number_guard: true, verify_model: gemini-lite}
+retrieval: {enabled: true, chunk_words: 150, overlap_words: 30, top_k: 8}
+context: {rerank: true, keep: 3, max_context_words: 450}
+compression: {enabled: true, target_ratio: 0.6}
+downshift:
+  enabled: true
+  rules:
+    - {name: pasted-text-needs-strong, tier: strong, has_user_context: true}
+    - {name: numbers-need-strong, tier: strong, numeric_reasoning: true}
+    - {name: everything-else-cheap, tier: cheap}
