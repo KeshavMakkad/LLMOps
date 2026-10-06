@@ -1,0 +1,6 @@
+name: cache
+description: "Ablation: only the guarded exact + semantic cache is on (threshold 0.84, number guard, cheap-LLM verifier)."
+default_tier: strong
+cache: {exact: true, semantic: true, threshold: 0.84, number_guard: true, verify_model: gemini-lite}
+retrieval: {enabled: true, chunk_words: 150, overlap_words: 30, top_k: 8}
+context: {rerank: false, keep: 8}
