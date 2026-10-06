@@ -1,0 +1,12 @@
+# Render's free tier sleeps after 15 min idle; ping every 10 min so demos and the dashboard's
+# live tab don't hit a 30-60 s cold start. One always-on free service fits in 750 h/month.
+name: keepalive
+on:
+  schedule: [{cron: "*/10 * * * *"}]
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - run: curl -sf --max-time 90 "${{ vars.FRUGAL_URL }}/healthz" || curl -sf --max-time 90 "${{ vars.FRUGAL_URL }}/healthz"

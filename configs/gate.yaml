@@ -1,0 +1,5 @@
+# Eval gate thresholds (see frugal/gate.py). A PR that edits configs/policies/optimized.yaml
+# must keep quality within this bound of `naive` while still saving tokens.
+max_quality_drop: 0.25     # judge score points (1-5 scale), and only fails if the drop is significant
+max_false_hit_rate: 0.05   # at most 5% of cache-served answers may belong to a different question
+min_tokens_saved: 0.20     # must still save at least 20% of tokens vs naive
