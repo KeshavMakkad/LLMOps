@@ -1,0 +1,104 @@
+---
+doc_id: tax/it_itr_forms_salaried
+title: "Returns and forms applicable for salaried individuals (AY 2026-27)"
+source_url: https://www.incometax.gov.in/iec/foportal/help/individual/return-applicable-1
+retrieved: 2026-10-05
+subdomain: income_tax
+applies_to: "AY 2026-27 (FY 2025-26)"
+---
+
+##  Salaried Individuals for AY 2026-27
+
+## Returns and Forms Applicable for Salaried Individuals for AY 2026-27
+
+**Disclaimer:**  The content on this page is only to give an overview and general guidance and is not exhaustive. For complete details and guidelines please refer to the Income Tax Act, 1961 Forms, Rules and Notifications.
+
+  1. **ITR-1 (SAHAJ) – Applicable only for Individual**
+
+---
+This return is applicable for a Resident (other than Not Ordinarily Resident) Individual having Total Income from any of the following sources up to ₹ 50 lakh
+| Salary / Pension | One House Property | Other sources (Interest, Family Pension, Dividend etc.) | Agricultural Income up to ₹ 5,000 | Capital Gain income u/s 112 A (Income Tax Act,1961) up to ₹ 1,25,000
+---|---|---|---|---
+Note: ITR-1 cannot be used by a person who: a) is a Director in a company  b) has short term capital gain c) has Long-term capital gain u/s 112A of Income Tax Act,1961 exceeding ₹1,25,000 d) has held any unlisted equity shares at any time during the previous year  e) has any asset (including financial interest in any entity) located outside India  f) has signing authority in any account located outside India  g) has income from any source outside India  h) is a person in whose case tax has been deducted u/s 194N of Income Tax Act,1961 i) is a person in whose case payment or deduction of tax has been deferred on ESOP j) has any brought forward loss or loss to be carried forward under any head of income k) has total income exceeding ₹50 lakhs  (excluding LTCG u/s 112A upto ₹1,25,000)
+
+**2\. ITR-2 - Applicable for Individual (Not eligible for ITR 1) and HUF**
+---
+This return is applicable for Individual and Hindu Undivided Family (HUF)
+  | Having Income under any head other than Profits and Gains of Business or Profession. | Who is not eligible to file ITR-1
+---|---
+
+**3\. ITR-3- Applicable for Individual and HUF**
+---
+This return is applicable for Individual and Hindu Undivided Family (HUF)
+  | Having Income under the heads Salary/Pension, House Property, Profits or Gains of Business or Profession, Capital Gains or Income from Other Sources. | Who is not eligible to file ITR-1, ITR-2 or ITR-4
+---|---
+
+**4\. ITR-4 (SUGAM) – Applicable for Individual, HUF and Firm (other than LLP)**
+---
+This return is applicable for an Individual or Hindu Undivided Family (HUF), who is Resident other than Not Ordinarily Resident or a Firm (other than LLP) which is a Resident having Total Income under Business or Profession which is computed on a presumptive basis (u/s 44AD / 44ADA / 44AE of Income Tax Act,1961) and income from any of the following sources:
+  | Salary / Pension | One House Property | Other sources (Interest, Family Pension, Dividend etc.) | Agricultural Income up to ₹ 5,000 | Capital Gain income u/s 112 A (Income Tax Act,1961) up to ₹ 1,25,000
+---|---|---|---|---
+
+**Note 1:** ITR-4 cannot be used by a person who:
+
+  1. is a Director in a company
+  2. has short term capital gains
+  3. has Long-term capital gain u/s 112A of Income Tax Act,1961 exceeding ₹1,25,000
+  4. has held any unlisted equity shares at any time during the previous year
+  5. has any asset (including financial interest in any entity) located outside India
+  6. has signing authority in any account located outside India
+  7. has income from any source outside India
+  8. is a person in whose case payment or deduction of tax has been deferred on ESOP
+  9. who has any brought forward loss or loss to be carried forward under any head of income
+  10. has total income exceeding ₹50 lakhs (excluding LTCG u/s 112A upto ₹1,25,000)
+
+   **Note 2:  ** ITR-4 (Sugam) is not mandatory. It is a simplified return form to be used by an Assessee, at his option, if he is eligible to declare Profits and Gains from Business or Profession on presumptive basis u/s 44AD, 44ADA or 44AE of Income Tax Act,1961.
+
+## Forms Applicable (As per Income Tax Act,1961):
+
+**1\. Form 12BB - Particulars of claims by an employee for deduction of tax (u/s 192 of Income Tax Act,1961)**
+---
+**Provided by** |  **Details provided in the form**
+An Employee to his Employer(s) |  Evidence or particulars of HRA, LTC, Deduction of Interest on home loan, Tax Saving Claims / Deductions on eligible payments or investments for the purpose of calculating Tax to be Deducted at Source (TDS)
+
+**2\. Form 16 - Certificate of Tax Deducted at Source on Salary (u/s 203 of the Income Tax Act, 1961)**
+---
+**Provided by** |  **Details provided in the form**
+An Employer(s) to his Employee at the end of the financial year |  Income of employee, Deductions / Exemptions and Tax Deducted at Source for the purpose of Computing Tax Payable / Refundable
+
+**3\. Form 16A – Certificate u/s 203 of the Income Tax Act, 1961 for TDS on Income other than Salary**
+---
+**Provided by** |  **Details provided in the form**
+Deductor to Deductee |  Form 16A is a Tax Deducted at Source (TDS) Certificate issued quarterly that captures the amount of TDS, Nature of Payments and the TDS Payments deposited with the Income Tax Department
+
+**4\. Form 67- Statement of Income from a country or specified territory outside India and Foreign Tax Credit**
+---
+**Submitted by** |  **Details provided in the form**
+Taxpayer on or before the due date specified for furnishing the ITRs u/s 139(1) of Income Tax Act,1961. |  Income from a country or specified territory outside India and Foreign Tax Credit claimed
+
+**5\. Form 26 AS** |  **AIS (Annual information Statement)**
+---|---
+**Provided by:** Income Tax Department (It is available on e-Filing Portal: Login > e-File > Income Tax Return > View Form 26AS) |  **Provided by:** Income Tax Department (It can be accessed after logging on to Income Tax e-Filing portal) Login to e-filing portal > AIS
+**Details provided in the form:** Tax Deducted / Collected at Source. |  **Details provided in the form:**
+
+  * Tax Deducted / Collected at Source
+  * SFT Information
+  * Payment of taxes
+  * Demand / Refund
+
+Other information (like Pending/Completed proceedings, GST Information, Information received from foreign government etc.)
+
+**6\. Form 15G - Declaration by resident taxpayer (not being a Company or Firm) claiming certain receipts without deduction of tax**
+---
+**Submitted by** |  **Details provided in the form**
+A Resident Individual less than 60 years or HUF or any other Person (other than Company / Firm) to Bank for not deducting TDS on Interest Income, if the income is below basic exemption limit |  Estimated Income for the FY
+
+**7\. Form 15H - Declaration to be made by a resident individual (who is 60 years age or more) claiming certain receipts without deduction of tax**
+---
+**Submitted by** |  **Details provided in the form**
+A Resident Individual, 60 years or more to Bank for not deducting TDS on Interest Income |  Estimated Income for the FY
+
+**8\. Form 10E - Form for furnishing particulars of Income for claiming relief u/s 89(1) of Income Tax Act,1961** **when Salary is paid in arrears or advance**
+---
+**Submitted by Individual for claiming relief in ITR u/s 89(1)** |  **Details provided in the form**
+An Employee in the Income Tax Department |  1.Arrears / Advance Salary 2.Gratuity 3.Compensation for Termination 4.Commutation of Pension
