@@ -1,0 +1,58 @@
+# Model registry.
+#   input/output_per_mtok       what we actually pay (free tier -> 0), used for actual spend
+#   paid_input/output_per_mtok  published paid prices, used only for the labelled "$ at paid prices" estimate
+# Prices retrieved 2026-10-06: Gemini from https://ai.google.dev/gemini-api/docs/pricing,
+# Gemma 4 from its OpenRouter listing (https://openrouter.ai/api/v1/models).
+# Free-tier limits seen on this key: 3.5 Flash 20 requests/day, the Flash-Lite models 500/day each
+# (separate buckets per model), ~15/min. Check ids with `frugal models`.
+models:
+  gemini-lite:               # strong tier + cache verifier
+    provider: gemini
+    model: gemini-3.1-flash-lite
+    family: gemini
+    paid_input_per_mtok: 0.25
+    paid_output_per_mtok: 1.50
+    rpm: 14
+  gemini-35-lite:            # used for the cache sweep's verifier runs
+    provider: gemini
+    model: gemini-3.5-flash-lite
+    family: gemini
+    paid_input_per_mtok: 0.30
+    paid_output_per_mtok: 2.50
+    rpm: 14
+  gemma-26b:                 # cheap tier (MoE, ~4B active params)
+    provider: gemini
+    model: gemma-4-26b-a4b-it
+    family: gemma
+    paid_input_per_mtok: 0.09
+    paid_output_per_mtok: 0.30
+    rpm: 14
+    supports_json_mode: false   # returns fenced JSON; parse_json handles it
+    thinking_level: minimal     # otherwise it can spend the whole output budget thinking
+  gemini-judge:              # grader; separate model so it has its own daily quota
+    provider: gemini
+    model: gemini-3.1-flash-lite-preview
+    family: gemini
+    rpm: 14
+  gemini-flash:              # kept for reference; free tier is 20 requests/day
+    provider: gemini
+    model: gemini-3.5-flash
+    family: gemini
+    paid_input_per_mtok: 1.50
+    paid_output_per_mtok: 9.00
+    rpm: 4
+    disable_thinking: true
+  fake:
+    provider: fake
+    model: fake-1
+    family: fake
+    paid_input_per_mtok: 0.30
+    paid_output_per_mtok: 2.50
+    rpm: 100000
+  fake-lite:
+    provider: fake
+    model: fake-lite-1
+    family: fake
+    paid_input_per_mtok: 0.09
+    paid_output_per_mtok: 0.30
+    rpm: 100000
