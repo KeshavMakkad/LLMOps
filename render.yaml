@@ -1,0 +1,23 @@
+# Render blueprint: New + > Blueprint > point at this repo.
+services:
+  - type: web
+    name: frugal-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /healthz
+    autoDeploy: true            # every push to main redeploys, so the service matches main
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: DATABASE_URL       # Neon (request log)
+        sync: false
+      - key: FRUGAL_API_TOKEN
+        generateValue: true
+      - key: FRUGAL_MAX_DAILY_CALLS
+        value: "300"            # protects the free-tier quota; cache hits don't count
+      - key: LANGFUSE_PUBLIC_KEY
+        sync: false
+      - key: LANGFUSE_SECRET_KEY
+        sync: false
+      - key: LANGFUSE_HOST
+        value: https://jp.cloud.langfuse.com

@@ -1,0 +1,9 @@
+.venv
+.git
+.frugal
+**/__pycache__
+dashboard
+tests
+loadtest
+docs
+results/experiments
