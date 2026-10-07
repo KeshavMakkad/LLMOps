@@ -5,7 +5,7 @@ model downshift) and proves, with an eval gate, that answer quality holds.**
 
 | | |
 |---|---|
-| 🔌 API (Render) | `https://frugal-api.onrender.com` → [`/docs`](https://frugal-api.onrender.com/docs) *(set after deploy)* |
+| 🔌 API (Render) | [frugal-api-9x10.onrender.com](https://frugal-api-9x10.onrender.com/docs) (interactive docs at `/docs`) |
 | 📊 Dashboard (Streamlit) | [frugal-llmops.streamlit.app](https://frugal-llmops.streamlit.app) |
 
 ---
