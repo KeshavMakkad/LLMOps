@@ -59,10 +59,12 @@ Thresholds live in `configs/gate.yaml`.
 
 To produce the "blocked PR" screenshot:
 ```bash
-git checkout -b aggressive-cache
-# make the cache dangerously loose: no guards, low threshold
-sed -i '' 's/threshold: 0.84/threshold: 0.80/; s/number_guard: true/number_guard: false/; s/verify_model: gemini-lite/verify_model: null/' configs/policies/optimized.yaml
-git commit -am "Raise cache hit rate" && git push -u origin aggressive-cache   # open a PR
+git checkout -b squeeze-more-tokens
+# swap in the aggressive config: tighter context (top 3, 450 words) + compression to 60%
+sed 's/^name: aggressive/name: optimized/' configs/policies/aggressive.yaml > configs/policies/optimized.yaml
+git commit -am "Tighten context budget and enable compression" && git push -u origin squeeze-more-tokens
+# open a PR
 ```
-The gate should fail on false hits. Mark the `eval-gate / gate` check as required in branch
+It saves more tokens, but the gate fails it on quality (the context and compression ablations
+each show a significant drop). Mark the `eval-gate / gate` check as required in branch
 protection so the PR can't merge.

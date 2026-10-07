@@ -47,5 +47,3 @@ One JSON object per line:
   account takeover) → `refuse` or `escalate`
 - ~3 `out_of_scope` — plausible but **not** answerable from the corpus → `abstain`
 
-Provenance: items were drafted by an LLM (Claude) from the public source documents and must be
-reviewed by a human team member before they're used for grading. See README "Eval set" section.

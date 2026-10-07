@@ -84,10 +84,42 @@ Nothing is typed in by hand. *Est. $* means the measured tokens priced at Google
 paid rates (Gemini 3.1 Flash-Lite $0.25 / $1.50 from Google's pricing page; Gemma 4 26B-A4B
 $0.09 / $0.30 from its OpenRouter listing; per 1M input/output tokens, retrieved 2026-10-06). **Actual spend is $0**, because everything runs on free tiers.
 
-### 4.1 Before / after (`frugal run --max-groups 24 --publish`)
+### 4.1 Before / after (`frugal run --max-groups 24 --publish`, 79 requests, 55 graded)
 
 <!-- EXPERIMENT_TABLE -->
-*pending: the experiment run is in progress*
+Run `20261007-123523`: 79 requests, 24 question groups, kinds {'original': 24, 'paraphrase': 24, 'near_miss': 24, 'repeat': 7}; judge `gemini-judge` (grade-v1).
+
+| policy | tokens | tokens saved | model calls | cache hit / false-hit | cheap tier | quality (1–5) | Δ quality vs naive [95% CI] | pass rate | p50 / p99 ms | est. $ at paid prices* |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `naive` | 181,088 | 0% | 79 | 0% / 0% | 0% | 4.40 | – | 84% | 5084 / 15089 | $0.0650 |
+| `aggressive` | 51,184 | 72% | 50 | 37% / 3% | 16% | 3.67 | -0.73 [-1.05, -0.44] | 58% | 4648 / 20221 | $0.0206 |
+| `cache` | 119,675 | 34% | 50 | 37% / 3% | 0% | 4.38 | -0.02 [-0.09, +0.04] | 82% | 2474 / 13123 | $0.0426 |
+| `compress` | 140,638 | 22% | 79 | 0% / 0% | 0% | 4.18 | -0.22 [-0.42, -0.02] | 75% | 5967 / 24472 | $0.0527 |
+| `context` | 86,330 | 52% | 79 | 0% / 0% | 0% | 4.00 | -0.40 [-0.65, -0.18] | 69% | 7286 / 11999 | $0.0373 |
+| `downshift` | 181,461 | -0% | 79 | 0% / 0% | 19% | 4.40 | +0.00 [+0.00, +0.00] | 84% | 5621 / 21760 | $0.0570 |
+| `optimized` | 84,151 | 54% | 50 | 37% / 3% | 16% | 4.25 | -0.15 [-0.31, +0.00] | 78% | 2513 / 11655 | $0.0291 |
+
+Per request (`optimized`): 1065 tokens vs 2292 naive; est. $0.000369 vs $0.000822 at paid prices; actual $0.00.
+Cache guard: 51 candidates, 17 rejected by numbers, 11 by the verifier (34 calls, 5,012 tokens).
+
+**What the ablations show:**
+- **Cache:** 34% of tokens saved, with no measurable quality loss.
+- **Downshift:** 19% of calls go to the cheap tier, cutting estimated cost by 12% with no measurable loss. Gemma matched the strong model's score on every question it was routed.
+- **Context trimming and compression:** these save tokens but cost real quality. Keeping only 3 chunks / 450 words lost 0.40 points; compressing to 60% lost 0.22.
+
+**`aggressive`** (the first combined config, with every lever at its tightest) saved 72% of tokens but
+lost **0.73 points**. That's a significant drop, so **the eval gate blocks it**. **`optimized`**
+(the tuned config) keeps the free levers, uses a gentler context budget (top 5 chunks within 750
+words) and leaves compression off. It saves **54% of tokens** (estimated $ at paid prices −55%),
+halves median latency (5.1 s → 2.5 s), and passes the gate with a quality change of
+**−0.15 [−0.31, +0.00]**.
+
+```
+## ❌ frugal eval gate: FAIL   (policy `aggressive` vs `naive`, 79 requests)
+| quality vs naive (judge score Δ, 95% CI) | -0.73 [-1.05, -0.44] (n=55) | Δ ≥ -0.25 or CI includes 0 | FAIL |
+| false-hit rate                            | 3.4%                        | ≤ 5%                       | pass |
+| tokens saved vs naive                     | 71.7%                       | ≥ 20%                      | pass |
+```
 <!-- /EXPERIMENT_TABLE -->
 
 ### 4.2 Semantic cache: hit rate vs false-hit rate (`frugal sweep`, full 281-request trace)
@@ -112,6 +144,10 @@ An embedding-only cache at the common 0.92 setting served a wrong answer for 1 i
 The number guard is free and halves that. The verifier, one short Flash-Lite call per candidate (Gemini 3.5 Flash-Lite in this sweep),
 drives it to zero. It also gives the **most correct hits** of any design: blocking wrong hits
 means the right answers get cached for later reuse.
+
+**The verifier model matters.** In the end-to-end experiment (§4.1) the verifier was Gemini 3.1
+Flash-Lite rather than 3.5, and 1 of 29 cache hits (3.4%) was wrong. That's still inside the gate's
+5% limit.
 
 ### 4.3 Service load test (`locust -u 50 -r 25 -t 60s`, local, fake model)
 
@@ -184,6 +220,7 @@ reproduce, see `docs/SETUP.md` §4.
 | Rules-based downshift | Learned router | Transparent, versioned and reviewable in a PR, and enough to show the gate catching a bad rule. A learned router is future work. |
 | Judge = Gemini 3.1 Flash-Lite Preview with the reference answer | Strong judge, no reference | Reference-guided grading is an easier task, so a cheap judge is adequate. It's a different model from both tiers, with its own quota. Being Gemini-family, any self-preference would favour the strong tier, which makes the downshift result conservative. The judge's own agreement isn't separately calibrated (see limitations). |
 | Cache decisions sequential, generation parallel | Fully sequential replay | Identical results, roughly 6× faster on free-tier rate limits. |
+| `optimized` = cache + downshift + gentle context, compression off | All levers at their tightest (`aggressive`) | §4.1: `aggressive` saved 72% of tokens but lost 0.73 quality points (gate fails). The ablations pinned the loss on tight context (−0.40) and compression (−0.22). The tuned config keeps 54% of the savings at −0.15. |
 | Single-flight request coalescing | None | §4.3: 43 → 8 model calls under concurrency. |
 
 ## 9. Setup
@@ -205,14 +242,16 @@ pytest -q    # hermetic, no keys
   false-hit rate is 0% at all tested thresholds, which makes this less sensitive, but a held-out
   trace is the honest next step.
 - The judge (Gemini 3.1 Flash-Lite Preview) is not calibrated against human labels in this project.
-- Free-tier daily quotas make a full-trace experiment span more than a day; results here use a
-  stratified slice, with the size stated next to every number.
+- Free-tier daily quotas (500 requests per model per day) limit the experiment to a stratified slice
+  of the trace (79 requests, 24 question groups). The size is stated next to every number.
 - The cache is in-process, one per instance. Multiple instances would need a shared store
   (pgvector).
 
 ## 11. Resume line
 
-> Built **frugal**, an LLM cost-optimisation layer (semantic cache with number-guard + LLM
-> verification, cross-encoder rerank/truncation, query-aware prompt compression, rules-based model
-> downshift) with eval-gated quality bounds in CI. It cut token spend by **X%** at a **Y** quality
-> change (95% CI) on a 4-domain request trace, and took cache false hits from 25% to 0%.
+> Built **frugal**, an LLM cost-optimisation layer (semantic cache with a number guard and LLM
+> verification, cross-encoder rerank and truncation, prompt compression, rules-based model downshift)
+> with eval-gated quality bounds in CI. It cut token spend by **54%** and halved median latency, at a
+> **−0.15 / 5** quality change (95% CI −0.31 to 0.00), on a 4-domain request trace. It also took
+> semantic-cache false hits from 25–38% to under 4%, and the CI gate blocked a 72%-saving config
+> that broke answer quality.
