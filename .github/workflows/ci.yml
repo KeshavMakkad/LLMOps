@@ -25,6 +25,6 @@ jobs:
       - run: docker build -t frugal .
       - name: Smoke test container
         run: |
-          docker run -d -p 8000:8000 --name f frugal
+          docker run -d -p 8000:8000 --name frugal-smoke frugal
           for i in $(seq 1 30); do curl -sf localhost:8000/healthz && exit 0; sleep 1; done
-          docker logs f; exit 1
+          docker logs frugal-smoke; exit 1
