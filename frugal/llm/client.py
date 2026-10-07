@@ -69,7 +69,9 @@ def _call_gemini(spec: ModelSpec, system: str, user: str, temperature: float, ma
     from google.genai import types
 
     if _gemini_client is None:
-        _gemini_client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+        # explicit timeout: a connection dropped by laptop sleep otherwise hangs forever
+        _gemini_client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"),
+                                      http_options=types.HttpOptions(timeout=120_000))
     if not spec.supports_system:
         user = f"{system}\n\n---\n\n{user}"
     if json_mode and not spec.supports_json_mode:
