@@ -164,7 +164,16 @@ def gate(policy: str = typer.Argument("optimized"),
     from frugal import gate as g
     from frugal.experiment import run_experiment
 
-    result = run_experiment([policy], max_groups=max_groups, judge_model=judge)
+    try:
+        result = run_experiment([policy], max_groups=max_groups, judge_model=judge)
+    except Exception as exc:  # report why the gate couldn't run instead of failing silently
+        md = (f"## ⚠️ frugal eval gate could not run\n\n`{type(exc).__name__}: {str(exc)[:500]}`\n\n"
+              "Check that the repo secrets `GEMINI_API_KEY` and `DATABASE_URL` are set.")
+        console.print(md)
+        for target in filter(None, [summary_md, os.environ.get("GITHUB_STEP_SUMMARY")]):
+            with open(target, "a") as f:
+                f.write(md + "\n")
+        sys.exit(2)
     cand = result["policies"][load_policy_name(policy)]
     verdict = g.evaluate(cand, g.load_gate())
     md = g.markdown(verdict, cand, result["trace"])
