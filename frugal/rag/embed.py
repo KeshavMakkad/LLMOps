@@ -93,7 +93,9 @@ def _local_model_embed(texts: list[str], task: str) -> np.ndarray:
         if _local_model is None:
             from fastembed import TextEmbedding
 
-            _local_model = TextEmbedding(LOCAL_MODEL, threads=int(os.environ.get("FRUGAL_EMBED_THREADS", "2")))
+            # no ONNX memory arena: it holds on to peak buffers, too much for a 512 MB instance
+            _local_model = TextEmbedding(LOCAL_MODEL, threads=int(os.environ.get("FRUGAL_EMBED_THREADS", "1")),
+                                         enable_cpu_mem_arena=False)
         # bge uses an instruction prefix for queries; query_embed applies it.
         fn = _local_model.query_embed if task == "RETRIEVAL_QUERY" else _local_model.embed
         # Small batches: ONNX Runtime's memory arena grows to the largest batch it has seen,

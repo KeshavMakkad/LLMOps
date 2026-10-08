@@ -33,7 +33,7 @@ def _rerank_scores(query: str, texts: list[str]) -> list[float]:
         if _reranker is None:
             from fastembed.rerank.cross_encoder import TextCrossEncoder
 
-            _reranker = TextCrossEncoder(RERANK_MODEL)
+            _reranker = TextCrossEncoder(RERANK_MODEL, threads=1, enable_cpu_mem_arena=False)
         return [float(s) for s in _reranker.rerank(query, texts, batch_size=8)]
 
 
@@ -53,7 +53,8 @@ def build_context(domain: str, query: str, rcfg: RetrievalCfg, ccfg: ContextCfg)
     chunks = [h.chunk for h in hits]
     before = sum(words(c.text) for c in chunks)
     top = None
-    if ccfg.rerank and chunks:
+    # FRUGAL_RERANK=off skips the cross-encoder; the free 512 MB host can't hold both ONNX models
+    if ccfg.rerank and chunks and os.environ.get("FRUGAL_RERANK", "on") != "off":
         scores = _rerank_scores(query, [c.text for c in chunks])
         order = np.argsort(scores)[::-1]
         chunks = [chunks[i] for i in order]
