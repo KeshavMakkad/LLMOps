@@ -181,8 +181,18 @@ was stored. With single-flight coalescing it took **exactly 8**, and p99 fell fr
 4. It fails the check if the change saves money by breaking quality.
 
 `naive`'s calls are served from a shared Postgres response cache, so each PR only pays (in free
-quota) for what it changed. *Screenshot pending deployment:* `docs/img/blocked-pr.png`. To
-reproduce, see `docs/SETUP.md` §4.
+quota) for what it changed. The gate needs the repo secrets `GEMINI_API_KEY` and `DATABASE_URL`.
+
+To see it block a PR, copy the aggressive config over the shipped one on a branch and open a PR:
+
+```bash
+git checkout -b squeeze-more-tokens
+sed 's/^name: aggressive/name: optimized/' configs/policies/aggressive.yaml > configs/policies/optimized.yaml
+git commit -am "Tighten context budget and enable compression" && git push -u origin squeeze-more-tokens
+```
+
+With `gate` marked as a required check on `main`, the PR shows the failing quality check and can't
+be merged.
 
 ## 6. Eval set and trace
 
@@ -191,6 +201,12 @@ reproduce, see `docs/SETUP.md` §4.
   (statutes plus contract clauses).
 - **The questions** include 12 adversarial items (should refuse), 12 out-of-scope items (should
   abstain), 12 format-constrained items, 23 multi-hop items and 39 numeric items.
+- **Format:** `data/eval/<domain>.jsonl`, one JSON object per line with `id`, `domain`, `subdomain`,
+  `task_type` (`qa`, `clause_analysis`, `format`, `adversarial`, `out_of_scope`), `question`, optional
+  `context` (pasted clause text), `reference_answer`, `source_docs` (corpus `doc_id`s that support it),
+  `expected_behavior` (`answer`, `refuse`, `escalate`, `abstain`), `format_spec`, `difficulty` and `tags`.
+  Corpus files in `data/corpus/<domain>/` carry `doc_id`, `title`, `source_url` and `retrieved` in their
+  front matter. `frugal validate` checks every item and every cited document.
 - **The trace adds** 100 paraphrases, 48 near-misses and 33 exact repeats, for 281 requests. See
   `data/trace/variants.jsonl`.
 - **Scoring:** a reference-guided LLM judge (Gemini 3.1 Flash-Lite Preview, rubric `grade-v1`, 1–5, pass ≥ 4) for
@@ -229,15 +245,36 @@ reproduce, see `docs/SETUP.md` §4.
 
 ## 9. Setup
 
-See [`docs/SETUP.md`](docs/SETUP.md). In short: a Gemini API key (free), plus Neon, Render and
-Streamlit Cloud accounts (free); Langfuse is optional.
+Everything is free tier.
+
+| what | used for |
+|---|---|
+| `GEMINI_API_KEY` ([AI Studio](https://aistudio.google.com/apikey)) | Gemini 3.1 Flash-Lite (strong tier, cache verifier), Gemma 4 26B-A4B (cheap tier), Gemini 3.1 Flash-Lite Preview (grader) |
+| `DATABASE_URL` ([Neon](https://neon.tech), pooled URL) | request log for the API, shared response cache for the CI gate (optional locally) |
+| [Render](https://render.com) | hosts the API from `render.yaml` (New → Blueprint) |
+| [Streamlit Cloud](https://share.streamlit.io) | hosts `dashboard/app.py` |
+| Langfuse keys (optional) | per-call traces |
+
+Embeddings (`BAAI/bge-small-en-v1.5`) and the reranker (`Xenova/ms-marco-MiniLM-L-6-v2`) run
+locally through `fastembed`: no key, no quota.
 
 ```bash
 pip install -e ".[dev,ui,tracing]" && cp .env.example .env   # add GEMINI_API_KEY
-frugal build-index && frugal sweep && frugal run --max-groups 24 --publish
+frugal models          # check the model ids in configs/models.yaml are live
+frugal validate        # eval set + trace + corpus integrity
+frugal build-index     # one-off: embed corpus + trace, download reranker (~3 min)
+frugal sweep           # cache threshold sweep -> results/sweep.json
+frugal run --max-groups 24 --publish   # all policies -> results/latest.json
+frugal serve           # API on :8000, docs at /docs
 streamlit run dashboard/app.py
-pytest -q    # hermetic, no keys
+pytest -q              # hermetic: fake models, no keys, no network
 ```
+
+Offline, with no keys at all: `FRUGAL_FAKE_EMBED=1 FRUGAL_FAKE_LLM=1 frugal run --max-groups 12`.
+
+Deploying: on Render, create a Blueprint from this repo and set `GEMINI_API_KEY` and
+`DATABASE_URL` (`FRUGAL_API_TOKEN` is generated; send it as `Authorization: Bearer …` to
+`POST /v1/answer`). For CI, add the repo secrets `GEMINI_API_KEY` and `DATABASE_URL`.
 
 ## 10. Limitations
 
