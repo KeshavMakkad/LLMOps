@@ -1,14 +1,13 @@
 name: optimized
 description: >-
-  Tuned combined config. Keeps the levers that measured as free (guarded cache, downshift), uses a
-  gentler context budget (rerank, keep top 5 within 750 words) and leaves compression off, since
-  on its own it cost a small but significant amount of quality. This is the file a PR changes;
-  the eval gate checks it against `naive`.
+  First combined config: guarded cache + rerank to top 3 within 450 words + compression to ~60% +
+  downshift. Saves the most tokens, but the context and compression ablations show it costs
+  answer quality, so the eval gate blocks it. Kept to show what the gate catches.
 default_tier: strong
 cache: {exact: true, semantic: true, threshold: 0.84, number_guard: true, verify_model: gemini-lite}
 retrieval: {enabled: true, chunk_words: 150, overlap_words: 30, top_k: 8}
-context: {rerank: true, keep: 5, max_context_words: 750}
-compression: {enabled: false}
+context: {rerank: true, keep: 3, max_context_words: 450}
+compression: {enabled: true, target_ratio: 0.6}
 downshift:
   enabled: true
   rules:
