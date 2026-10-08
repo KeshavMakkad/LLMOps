@@ -6,6 +6,10 @@ model downshift) and proves, with an eval gate, that answer quality holds.**
 | | |
 |---|---|
 | 🔌 API (Render) | [frugal-api-9x10.onrender.com](https://frugal-api-9x10.onrender.com/docs) (interactive docs at `/docs`) |
+
+The live API runs on Render's free 512 MB instance, which can't hold both local ONNX models, so it
+runs with `FRUGAL_RERANK=off` (context is still trimmed to the top 5 chunks within 750 words, in
+retrieval order). All numbers below come from evaluation runs with the cross-encoder on.
 | 📊 Dashboard (Streamlit) | [frugal-llmops.streamlit.app](https://frugal-llmops.streamlit.app) |
 
 ---
