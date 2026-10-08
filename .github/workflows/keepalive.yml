@@ -9,4 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
-      - run: curl -sf --max-time 90 "${{ vars.FRUGAL_URL }}/healthz" || curl -sf --max-time 90 "${{ vars.FRUGAL_URL }}/healthz"
+      - env:
+          URL: ${{ vars.FRUGAL_URL || 'https://frugal-api-9x10.onrender.com' }}
+        run: curl -sf --max-time 90 "$URL/healthz" || curl -sf --max-time 90 "$URL/healthz"

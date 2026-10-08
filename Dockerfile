@@ -2,7 +2,10 @@ FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 \
     FRUGAL_ROOT=/app FRUGAL_CACHE_DIR=/tmp/frugal-cache \
-    FASTEMBED_CACHE_PATH=/app/.fastembed FRUGAL_EMBED_CACHE=/app/.frugal/embeddings.sqlite
+    FASTEMBED_CACHE_PATH=/app/.fastembed FRUGAL_EMBED_CACHE=/app/.frugal/embeddings.sqlite \
+    FRUGAL_RERANK=off
+# FRUGAL_RERANK=off: the free 512 MB host can't hold the embedding model and the cross-encoder
+# together (measured: OOM with both, ~210 MB steady with embeddings only). Evaluation runs keep it on.
 WORKDIR /app
 
 COPY pyproject.toml README.md ./
