@@ -37,14 +37,21 @@ def _db() -> sqlite3.Connection:
 def _pg():
     global _pg_ready
     from sqlalchemy import text
+    from sqlalchemy.exc import IntegrityError
 
     from frugal.store import engine
 
     eng = engine()
-    if not _pg_ready:
-        with eng.begin() as c:
-            c.execute(text("CREATE TABLE IF NOT EXISTS llm_cache (k TEXT PRIMARY KEY, v TEXT NOT NULL)"))
-        _pg_ready = True
+    with _lock:
+        if not _pg_ready:
+            # Postgres's IF NOT EXISTS isn't race-safe: a concurrent creator (another worker thread
+            # or another PR's gate on the shared DB) raises a UniqueViolation. The table exists then.
+            try:
+                with eng.begin() as c:
+                    c.execute(text("CREATE TABLE IF NOT EXISTS llm_cache (k TEXT PRIMARY KEY, v TEXT NOT NULL)"))
+            except IntegrityError:
+                pass
+            _pg_ready = True
     return eng, text
 
 
