@@ -6,11 +6,11 @@ model downshift) and proves, with an eval gate, that answer quality holds.**
 | | |
 |---|---|
 | 🔌 API (Render) | [frugal-api-9x10.onrender.com](https://frugal-api-9x10.onrender.com/docs) (interactive docs at `/docs`) |
+| 📊 Dashboard (Streamlit) | [frugal-llmops.streamlit.app](https://frugal-llmops.streamlit.app) |
 
 The live API runs on Render's free 512 MB instance, which can't hold both local ONNX models, so it
 runs with `FRUGAL_RERANK=off` (context is still trimmed to the top 5 chunks within 750 words, in
 retrieval order). All numbers below come from evaluation runs with the cross-encoder on.
-| 📊 Dashboard (Streamlit) | [frugal-llmops.streamlit.app](https://frugal-llmops.streamlit.app) |
 
 ---
 
@@ -30,6 +30,22 @@ Each fix has a quality risk, though:
 **frugal** applies four levers and measures every one of them, both the saving and the quality
 cost, on a fixed request trace. A CI gate refuses any configuration change that saves money by
 quietly breaking answers.
+
+**ML problem.** Input: a question, its domain and optional pasted text. Output: a grounded answer.
+For each request the layer decides whether to serve a cached answer, how much context to send and
+which model tier to call. The target is the cheapest path whose answer still scores like the
+baseline's.
+
+**Requirements** (the first three are enforced by the gate, §5):
+- quality: no significant drop vs `naive` (judge Δ ≥ −0.25, or the 95% CI includes 0);
+- cache correctness: false-hit rate ≤ 5%;
+- savings: ≥ 20% of tokens vs `naive`;
+- cost and footprint: $0 actual spend, a 512 MB host, at most 300 live model calls a day
+  (`FRUGAL_MAX_DAILY_CALLS`; cache hits don't count);
+- overhead: the layer itself must stay small next to model latency (measured p99 55 ms, §4.3).
+
+**Scope.** In: the cost layer in front of a RAG app, for 4 domains. Out: the chat UI, user
+accounts, training or fine-tuning models, and a learned router.
 
 ## 2. The four levers
 
@@ -228,7 +244,33 @@ be merged.
 - **Langfuse:** every uncached model call is a traced generation, tagged with policy, request and
   tier.
 
-## 8. Design decisions and trade-offs
+**Monitoring coverage** (of the five usual categories):
+
+| category | what we watch | where |
+|---|---|---|
+| operational | latency, request counts, cost, daily call cap | `/metrics`, `request_log`, dashboard |
+| input | domain, pasted text, routing rule hit per request | `request_log`, `GET /v1/requests` |
+| output | tokens, served-from (cache / tier), cache similarity | `request_log`, Langfuse |
+| quality | offline judge score and false-hit rate per policy, on every gated PR | `results/latest.json`, gate comment |
+| drift | **not yet.** Next step: track the cache hit rate and routing mix over time and alert on shifts | |
+
+**Online evaluation is not built yet.** Today quality is measured offline on the fixed trace. The
+next step is to sample a share of live `request_log` answers to the same judge (no reference
+answer, so a rubric-only grade) and plot it on the dashboard.
+
+## 8. Deployment, rollout and rollback
+
+- **Serving:** one Docker container on Render (`render.yaml`), FastAPI, models called over the
+  Gemini API; embeddings and reranker run in-process (ONNX). A GitHub Actions cron (`keepalive.yml`)
+  pings `/healthz` so the free instance doesn't sleep.
+- **Rollout:** every behaviour change is a PR to a versioned policy YAML. The eval gate replays the
+  trace and must pass, then the merge to `main` auto-deploys (`autoDeploy: true`).
+- **Rollback:** `git revert` the policy change and push; Render redeploys the previous config. This
+  was used for real: the `aggressive` policy was reverted in `28bceec` after it failed the gate.
+- **Safety nets:** the daily call cap, a request timeout on every model call, and single-flight
+  coalescing so a burst can't multiply model calls.
+
+## 9. Design decisions and trade-offs
 
 | decision | alternative | why (measured where possible) |
 |---|---|---|
@@ -243,7 +285,7 @@ be merged.
 | `optimized` = cache + downshift + gentle context, compression off | All levers at their tightest (`aggressive`) | §4.1: `aggressive` saved 72% of tokens but lost 0.73 quality points (gate fails). The ablations pinned the loss on tight context (−0.40) and compression (−0.22). The tuned config keeps 54% of the savings at −0.15. |
 | Single-flight request coalescing | None | §4.3: 43 → 8 model calls under concurrency. |
 
-## 9. Setup
+## 10. Setup
 
 Everything is free tier.
 
@@ -276,7 +318,7 @@ Deploying: on Render, create a Blueprint from this repo and set `GEMINI_API_KEY`
 `DATABASE_URL` (`FRUGAL_API_TOKEN` is generated; send it as `Authorization: Bearer …` to
 `POST /v1/answer`). For CI, add the repo secrets `GEMINI_API_KEY` and `DATABASE_URL`.
 
-## 10. Limitations
+## 11. Limitations
 
 - The eval set, paraphrases and near-misses are LLM-drafted from real documents (see §6).
 - The cache threshold was chosen on the same trace it's reported on. With the verifier the
@@ -288,7 +330,7 @@ Deploying: on Render, create a Blueprint from this repo and set `GEMINI_API_KEY`
 - The cache is in-process, one per instance. Multiple instances would need a shared store
   (pgvector).
 
-## 11. Resume line
+## 12. Resume line
 
 > Built **frugal**, an LLM cost-optimisation layer (semantic cache with a number guard and LLM
 > verification, cross-encoder rerank and truncation, prompt compression, rules-based model downshift)
