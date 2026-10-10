@@ -38,3 +38,20 @@ def test_threshold_respected():
     s = cache_scope("github", None)
     c.store(s, "q", "a", "r1", "g1", _vec(1, 0))
     assert c.lookup(s, "q2", _vec(1, 0.5)) is None
+
+
+def test_pg_table_create_tolerates_concurrent_creator(monkeypatch):
+    # Two gate runs on the shared Postgres cache race on CREATE TABLE IF NOT EXISTS (UniqueViolation).
+    from sqlalchemy.exc import IntegrityError
+
+    import frugal.store
+    from frugal.llm import cache as llm_cache
+
+    class Raced:
+        def begin(self):
+            raise IntegrityError("CREATE TABLE", {}, Exception("duplicate key pg_type_typname_nsp_index"))
+
+    monkeypatch.setattr(frugal.store, "engine", lambda: Raced())
+    monkeypatch.setattr(llm_cache, "_pg_ready", False)
+    eng, _ = llm_cache._pg()
+    assert isinstance(eng, Raced) and llm_cache._pg_ready
